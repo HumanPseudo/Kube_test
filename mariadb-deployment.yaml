@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: mariadb
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: mariadb
@@ -18,19 +18,31 @@ spec:
         image: mariadb:latest
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: your-root-password
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-secrets
+              key: root-password
         - name: MYSQL_DATABASE
-          value: your-database
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-secrets
+              key: database
         - name: MYSQL_USER
-          value: your-username
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-secrets
+              key: username
         - name: MYSQL_PASSWORD
-          value: your-password
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-secrets
+              key: password
         ports:
         - containerPort: 3306
         volumeMounts:
         - name: mariadb-storage
           mountPath: /var/lib/mysql
-      volumes:
-      - name: mariadb-storage
-        persistentVolumeClaim:
-          claimName: mariadb-pvc
+  volumes:
+  - name: mariadb-storage
+    persistentVolumeClaim:
+      claimName: mariadb-pvc
